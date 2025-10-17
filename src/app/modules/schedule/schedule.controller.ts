@@ -21,7 +21,6 @@ const insertIntoDB = catchAsync(async(req: Request, res: Response) => {
 const schedulesForDoctor = catchAsync(async(req: Request & {user?: IJWTPayload}, res: Response) => {
     const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
     const fillters = pick(req.query, ["startDateTime", "endDateTime"])
-
     
     const user = req.user;
     const result = await ScheduleService.schedulesForDoctor(user as IJWTPayload, fillters, options);
@@ -35,8 +34,20 @@ const schedulesForDoctor = catchAsync(async(req: Request & {user?: IJWTPayload},
     })
 })
 
+const deleteScheduleFromDB = catchAsync(async (req: Request, res: Response) => {
+    const result = await ScheduleService.deleteScheduleFromDB(req.params.id);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Schedule deleted successfully!",
+        data: result
+    })
+})
+
 
 export const ScheduleController = {
     insertIntoDB,
-    schedulesForDoctor
+    schedulesForDoctor,
+    deleteScheduleFromDB
 }
