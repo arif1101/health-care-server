@@ -80,7 +80,7 @@ const getAllFromDB = async (filters: any, options: IOptions) => {
 }
 
 
-const updateIntoDB = async (id: string, payload: Partial<IDoctorUpdateInput>) => {
+const updateIntoDB = async (id: string, payload: Partial<IDoctorUpdateInput >) => {
     const doctorInfo = await prisma.doctor.findUniqueOrThrow({
         where: {
             id
