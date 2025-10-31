@@ -1,30 +1,32 @@
 import { NextFunction, Request, Response } from "express"
 import { jwtHelper } from "../helper/jwtHelper";
-
+import httpStatus from "http-status"
+import ApiError from "../error/ApiError";
 
 const auth = (...roles: string[]) => {
-    return async (req: Request & {user?: any}, res: Response, next: NextFunction) => {
-        try{
+    return async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+        try {
             const token = req.cookies.accessToken;
-            
-            if(!token){
-                throw new Error("You are not authorized")
+
+            if (!token) {
+                throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!")
             }
             
-            const verifyUser = jwtHelper.verifyToken(token, "abcd")
-            
+            const verifyUser = jwtHelper.verifyToken(token, "abcd");
+
             req.user = verifyUser;
+            console.log(verifyUser,roles)
 
-            if(roles.length && !roles.includes(verifyUser.role)){
-                throw new Error("You are not authorize!")
+            if (roles.length && !roles.includes(verifyUser.role)) {
+                throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!")
             }
 
-            next()
-            
-        }catch(err){
+            next();
+        }
+        catch (err) {
             next(err)
         }
     }
 }
 
-export default auth
+export default auth;
