@@ -8,7 +8,7 @@ const router = Router()
 
 router.get(
     "/",
-    auth(UserRole.DOCTOR, UserRole.ADMIN),
+    auth(UserRole.DOCTOR, UserRole.ADMIN, UserRole.PATIENT),
     ScheduleController.schedulesForDoctor
 )
 
