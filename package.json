@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
     "uuid": "^13.0.0",
     "zod": "^4.1.12"
   },
@@ -33,6 +34,7 @@
     "@types/node": "^24.5.0",
     "multer": "^2.0.2",
     "prisma": "^6.16.3",
+    "stripe": "^19.3.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"
   }
