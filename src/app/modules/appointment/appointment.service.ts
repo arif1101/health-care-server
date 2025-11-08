@@ -1,19 +1,19 @@
 import {v4 as uuidv4} from "uuid"
 import { prisma } from "../../shared/prisma";
 import { IJWTPayload } from "../../types/common";
+import { stripe } from "../../helper/stripe";
+import { config } from "dotenv";
 
 
 
 
-const createAppointment = async(user: IJWTPayload, payload: {doctorId: string, scheduleId: string}) => {
-    // 1. patientdata by email
+const createAppointment = async (user: IJWTPayload, payload: { doctorId: string, scheduleId: string }) => {
     const patientData = await prisma.patient.findUniqueOrThrow({
         where: {
             email: user.email
         }
     });
 
-    // 2. all doctorData by id and not deleted
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             id: payload.doctorId,
@@ -21,7 +21,6 @@ const createAppointment = async(user: IJWTPayload, payload: {doctorId: string, s
         }
     });
 
-    // 3. check isBooked from Schedule by doctorId, scheduleId, isBookd will true
     const isBookedOrNot = await prisma.doctorSchedules.findFirstOrThrow({
         where: {
             doctorId: payload.doctorId,
@@ -30,11 +29,9 @@ const createAppointment = async(user: IJWTPayload, payload: {doctorId: string, s
         }
     })
 
-    // 4. genereate videoCallingId
-    const videoCallingId = uuidv4()
-    // 5. create appointment
-    const result = await prisma.$transaction(async(tnx) => {
-        // a. create appointment data
+    const videoCallingId = uuidv4();
+
+    const result = await prisma.$transaction(async (tnx) => {
         const appointmentData = await tnx.appointment.create({
             data: {
                 patientId: patientData.id,
@@ -43,7 +40,7 @@ const createAppointment = async(user: IJWTPayload, payload: {doctorId: string, s
                 videoCallingId
             }
         })
-        // b. update doctor schedule
+
         await tnx.doctorSchedules.update({
             where: {
                 doctorId_scheduleId: {
@@ -55,19 +52,47 @@ const createAppointment = async(user: IJWTPayload, payload: {doctorId: string, s
                 isBooked: true
             }
         })
-        const transactionId = uuidv4()
-        // c. payment create
-        await tnx.payment.create({
+
+        const transactionId = uuidv4();
+
+        const paymentData = await tnx.payment.create({
             data: {
                 appointmentId: appointmentData.id,
                 amount: doctorData.appointmentFee,
                 transactionId
             }
         })
-        return appointmentData
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "payment",
+            customer_email: user.email,
+            line_items: [
+                {
+                    price_data: {
+                        currency: "bdt",
+                        product_data: {
+                            name: `Appointment with ${doctorData.name}`,
+                        },
+                        unit_amount: doctorData.appointmentFee * 100,
+                    },
+                    quantity: 1,
+                },
+            ],
+            metadata: {
+                appointmentId: appointmentData.id,
+                paymentId: paymentData.id
+            },
+            success_url: `https://www.programming-hero.com/`,
+            cancel_url: `https://next.programming-hero.com/`,
+        });
+
+        return { paymentUrl: session.url };
     })
+
+
     return result;
-}
+};
 
 export const AppointmentService = {
     createAppointment,

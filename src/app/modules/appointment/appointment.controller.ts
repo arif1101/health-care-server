@@ -6,9 +6,9 @@ import { AppointmentService } from "./appointment.service";
 
 
 
-const createAppointment = catchAsync(async(req: Request &{user?: IJWTPayload}, res: Response)=> {
+const createAppointment = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
     const user = req.user;
-    const result = await AppointmentService.createAppointment(user as IJWTPayload, req.body)
+    const result = await AppointmentService.createAppointment(user as IJWTPayload, req.body);
 
     sendResponse(res, {
         statusCode: 201,
@@ -16,8 +16,7 @@ const createAppointment = catchAsync(async(req: Request &{user?: IJWTPayload}, r
         message: "Appointment created successfully!",
         data: result
     })
-    
-})
+});
 
 
 export const AppointmentController = {
