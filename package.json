@@ -33,6 +33,7 @@
     "@types/node": "^24.5.0",
     "multer": "^2.0.2",
     "prisma": "^6.16.3",
+    "stripe": "^19.3.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"
   }
