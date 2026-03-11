@@ -1,7 +1,6 @@
 node_modules
 dist
-temp_auto_push.bat
-
 /src/generated/prisma
-.gitignore
-config.bat
+
+temp_auto_push.bat
+temp_interactive_push.bat
